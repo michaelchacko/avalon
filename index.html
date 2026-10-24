@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10141a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Pass-the-phone Avalon with Lord of the Rings characters: deal characters, track quests, read the rules.">
+<title>Avalon Table</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2310141a'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23d4ae63' stroke-width='3'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-size='28' fill='%23d4ae63'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<style>
+/* Base page setup */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+/* Layout: one phone passed around a dark table. Tabs for Setup, Reveal, Quests, Rules; the flipping character card is the one bold moment. Single dark look on purpose. */
+:root {
+  --bg: #10141a;
+  --surface: #191f28;
+  --surface-2: #232b36;
+  --line: #2e3845;
+  --text: #ece6d8;
+  --muted: #98a1ac;
+  --brass: #d4ae63;
+  --warn: #e0a640;
+  --good: #3f7fde;
+  --good-hi: #79a8f0;
+  --good-deep: #183764;
+  --evil: #cf3d47;
+  --evil-hi: #ec7a80;
+  --evil-deep: #58181e;
+  --on-color: #ffffff;
+  --display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
+  --body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--text); }
+body { font-family: var(--body); font-size: 16px; line-height: 1.4; -webkit-tap-highlight-color: transparent; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+h1, h2, h3, p { margin: 0; }
+h1, h2 { text-wrap: balance; }
+
+.wrap {
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 40px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.top h1 { font-family: var(--display); font-weight: 400; font-size: 32px; line-height: 1; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.tab { height: 40px; border: 0; border-radius: 9px; background: none; color: var(--muted); font-weight: 700; font-size: 15px; }
+.tab[aria-selected="true"] { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+
+#view { display: flex; flex-direction: column; gap: 22px; }
+.block { display: flex; flex-direction: column; gap: 12px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sec-head h2 { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.1; }
+.sec-head > span { font-size: 13px; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.link { background: none; border: 0; padding: 4px 0; color: var(--brass); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
+.note { font-size: 14px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; justify-content: space-between; }
+
+/* Setup */
+.count { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.cnt { height: 50px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-family: var(--display); font-size: 24px; font-variant-numeric: tabular-nums; }
+.cnt[aria-checked="true"] { background: var(--brass); color: var(--bg); border-color: var(--brass); }
+.qline { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.qmini { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-family: var(--display); font-size: 16px; color: var(--text); }
+.qmini.two { border-color: var(--evil); }
+.names { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.seat { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; height: 46px; }
+.seat:focus-within { border-color: var(--brass); }
+.seat span { font-size: 12px; color: var(--muted); width: 18px; text-align: right; font-variant-numeric: tabular-nums; flex: none; }
+.seat input { flex: 1; min-width: 0; height: 100%; background: none; border: 0; outline: none; font-size: 16px; }
+.seat input::placeholder { color: var(--muted); opacity: .7; }
+h3.side { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
+h3.side.good { color: var(--good-hi); }
+h3.side.evil { color: var(--evil-hi); }
+.roles { display: flex; flex-direction: column; gap: 8px; }
+.toggle { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.toggle:disabled { opacity: .45; cursor: not-allowed; }
+.toggle[aria-checked="false"] .tt b { color: var(--muted); }
+.sig { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); }
+.sig.good { color: var(--good-hi); }
+.sig.evil { color: var(--evil-hi); }
+.sig.rule { color: var(--brass); }
+.sig svg { width: 24px; height: 24px; }
+svg.i { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+svg.i .f { fill: currentColor; stroke: none; }
+.tt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tt b { font-size: 16px; }
+.tt b i { font-style: normal; font-weight: 500; font-size: 13px; color: var(--muted); }
+.tt small { font-size: 13px; color: var(--muted); line-height: 1.3; }
+.sw { flex: none; width: 44px; height: 26px; border-radius: 13px; background: var(--line); position: relative; transition: background .15s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+.toggle[aria-checked="true"] .sw { background: var(--brass); }
+.toggle[aria-checked="true"] .sw::after { transform: translateX(18px); background: var(--bg); }
+.filler { font-size: 14px; color: var(--muted); padding: 0 4px; }
+.msgs { display: flex; flex-direction: column; gap: 8px; }
+.msgs:empty { display: none; }
+.msg { padding: 10px 12px; border-radius: 10px; font-size: 14px; border: 1px solid; }
+.msg.err { border-color: var(--evil); background: var(--evil-deep); }
+.msg.warn { border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 9%, var(--surface)); }
+.foot { display: flex; flex-direction: column; gap: 12px; }
+
+.cta { height: 56px; width: 100%; border-radius: 14px; border: 0; background: var(--brass); color: var(--bg); font-weight: 800; font-size: 17px; padding: 0 16px; }
+.cta:disabled { opacity: .35; cursor: not-allowed; }
+.cta.evil { background: var(--evil); color: var(--on-color); }
+.btn { min-height: 46px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 700; font-size: 15px; }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn.primary { border-color: var(--brass); color: var(--brass); }
+.btn.good { background: var(--good); border-color: var(--good); color: var(--on-color); }
+.btn.danger { background: var(--evil); border-color: var(--evil); color: var(--on-color); }
+.confirm { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--evil); border-radius: 12px; padding: 12px 14px; }
+.confirm > div { display: flex; gap: 8px; }
+
+/* Reveal */
+.reveal { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+.reveal > .knows, .reveal > .tips { align-self: stretch; text-align: left; }
+.flip { background: none; border: 0; padding: 0; display: block; border-radius: 18px; }
+.cardback, .rolecard { width: min(240px, 64vw); max-width: 100%; aspect-ratio: 5 / 7; border-radius: 18px; padding: 10px; }
+.cardback { background: var(--surface-2); border: 1px solid var(--line); }
+.cb-in { height: 100%; border: 1.5px solid var(--brass); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--brass) 13%, transparent) 0 2px, transparent 2px 12px),
+                    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--brass) 13%, transparent) 0 2px, transparent 2px 12px); }
+.cb-label { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); background: var(--surface-2); padding: 2px 10px; border-radius: 999px; }
+.cb-num { width: 112px; height: 112px; border-radius: 50%; background: var(--surface-2); border: 1.5px solid var(--brass); display: grid; place-items: center; font-family: var(--display); font-size: 64px; line-height: 1; color: var(--brass); font-variant-numeric: tabular-nums; }
+.rolecard.good { background: linear-gradient(160deg, var(--good), var(--good-deep)); }
+.rolecard.evil { background: linear-gradient(160deg, var(--evil), var(--evil-deep)); }
+.rc-in { height: 100%; border: 1.5px solid color-mix(in srgb, var(--on-color) 45%, transparent); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 14px 10px; color: var(--on-color); text-align: center; }
+.rc-side { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.rc-sig svg { width: 84px; height: 84px; stroke-width: 2; }
+.rc-name { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 9vw, 40px); line-height: 1.05; }
+.rc-tag { display: block; font-size: 14px; opacity: .9; margin-top: 4px; }
+.rc-team { font-weight: 800; letter-spacing: .2em; text-transform: uppercase; font-size: 13px; padding: 4px 14px; border-radius: 999px; background: color-mix(in srgb, var(--bg) 35%, transparent); }
+.anim { animation: turn .4s cubic-bezier(.2,.8,.2,1); }
+@keyframes turn { from { transform: perspective(900px) rotateY(80deg); opacity: .3; } to { transform: none; opacity: 1; } }
+.hint { color: var(--muted); font-size: 15px; }
+.knows { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.knows h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); }
+.knows ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.tips { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.tips li::marker { color: var(--brass); }
+.dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.dots .seen { background: var(--muted); }
+.dots .cur { background: var(--brass); }
+
+.done { display: flex; flex-direction: column; gap: 18px; }
+.done > h2 { font-family: var(--display); font-weight: 400; font-size: 30px; line-height: 1.1; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; min-width: 0; }
+.fact span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.fact b { font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.15; overflow-wrap: anywhere; }
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.script h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); }
+.script ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.script li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+.script em { font-style: normal; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.numgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.num { height: 52px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font-family: var(--display); font-size: 24px; font-variant-numeric: tabular-nums; }
+.namebtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.nbtn { padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 700; font-size: 15px; }
+.nbtn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.nbtn:disabled { opacity: .35; cursor: not-allowed; }
+
+.empty { text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; padding: 32px 8px; }
+.empty h2 { font-family: var(--display); font-weight: 400; font-size: 28px; }
+.empty .cta { max-width: 320px; }
+
+/* Quests */
+.score { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.score div { display: flex; align-items: baseline; justify-content: space-between; padding: 8px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.score span { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.score b { font-family: var(--display); font-weight: 400; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score .g b { color: var(--good-hi); }
+.score .e b { color: var(--evil-hi); }
+.leader { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; }
+.arrow { height: 48px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font-size: 22px; line-height: 1; }
+.ld { text-align: center; display: flex; flex-direction: column; min-width: 0; }
+.ld span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.ld b { font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1.1; overflow-wrap: anywhere; }
+.ld small { color: var(--muted); font-size: 13px; }
+.ld small strong { color: var(--brass); font-weight: 700; }
+.quests { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.q { background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.disc { position: relative; width: 100%; max-width: 88px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 28%, var(--surface-2), var(--surface) 70%); border: 2px solid var(--line); transition: border-color .15s, box-shadow .15s, transform .15s; }
+.q:active .disc { transform: scale(.96); }
+.q.sel .disc { border-color: var(--brass); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brass) 22%, transparent); }
+.disc .n { font-family: var(--display); font-size: clamp(26px, 8.5vw, 42px); line-height: 1; font-variant-numeric: tabular-nums; }
+.q.success .disc { background: radial-gradient(circle at 35% 28%, var(--good-hi), var(--good) 55%, var(--good-deep)); border-color: var(--good-deep); }
+.q.fail .disc { background: radial-gradient(circle at 35% 28%, var(--evil-hi), var(--evil) 55%, var(--evil-deep)); border-color: var(--evil-deep); }
+.q.sel.success .disc, .q.sel.fail .disc { border-color: var(--brass); }
+.mark { width: 52%; height: 52%; color: var(--on-color); }
+.badge { position: absolute; right: -2px; bottom: -2px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 12px; background: var(--evil); color: var(--on-color); border: 2px solid var(--bg); font-size: 13px; font-weight: 800; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+.cap { text-align: center; line-height: 1.15; }
+.cap .t { font-size: 13px; }
+.cap .r { display: block; font-size: 11px; color: var(--brass); min-height: 13px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.panel h2 { font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.1; }
+.panel p { color: var(--muted); font-size: 14px; }
+.panel.lady { border-color: color-mix(in srgb, var(--brass) 60%, transparent); }
+.panel.assn { border-color: var(--evil); }
+.panel-head { display: flex; flex-direction: column; gap: 2px; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.choice { height: 60px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface-2); font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.choice svg { width: 20px; height: 20px; }
+.choice.good { color: var(--good-hi); }
+.choice.evil { color: var(--evil-hi); }
+.choice.good[aria-pressed="true"] { background: var(--good); border-color: var(--good-hi); color: var(--on-color); }
+.choice.evil[aria-pressed="true"] { background: var(--evil); border-color: var(--evil-hi); color: var(--on-color); }
+.fails { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.fails > span { font-size: 14px; color: var(--muted); }
+.chips { display: flex; gap: 6px; }
+.chip { width: 44px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 700; font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.row-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.row-actions .link { color: var(--muted); }
+.pill { background: none; border: 1px solid var(--brass); color: var(--brass); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 14px; }
+.pips { display: flex; gap: 10px; }
+.pip { flex: 1; max-width: 64px; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); color: var(--muted); font-family: var(--display); font-size: 20px; display: grid; place-items: center; padding: 0; }
+.pip.last { border-color: var(--evil); color: var(--evil-hi); }
+.pip.on { background: var(--brass); border-color: var(--brass); color: var(--bg); }
+.pip.last.on { background: var(--evil); border-color: var(--evil); color: var(--on-color); }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.loyal { text-align: center; padding: 22px 16px; border-radius: 14px; border: 1px solid; display: flex; flex-direction: column; gap: 4px; }
+.loyal.good { background: var(--good-deep); border-color: var(--good); }
+.loyal.evil { background: var(--evil-deep); border-color: var(--evil); }
+.loyal span { font-size: 14px; opacity: .85; }
+.loyal b { font-family: var(--display); font-weight: 400; font-size: 44px; line-height: 1; }
+.over { border-radius: 16px; padding: 18px 16px; border: 1px solid; display: flex; flex-direction: column; gap: 12px; }
+.over.good { background: var(--good-deep); border-color: var(--good); }
+.over.evil { background: var(--evil-deep); border-color: var(--evil); }
+.over h2 { font-family: var(--display); font-weight: 400; font-size: 36px; line-height: 1; }
+.over > p { font-size: 16px; }
+.alllist { display: flex; flex-direction: column; gap: 6px; }
+.arow { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--bg) 45%, transparent); font-variant-numeric: tabular-nums; }
+.arow span.good { color: var(--good-hi); font-weight: 700; text-align: right; }
+.arow span.evil { color: var(--evil-hi); font-weight: 700; text-align: right; }
+
+/* Rules */
+.steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.steps li::marker { color: var(--brass); font-family: var(--display); }
+.prose { display: flex; flex-direction: column; gap: 8px; max-width: 65ch; }
+.chipline { display: flex; flex-wrap: wrap; gap: 6px; }
+.rchip { padding: 4px 10px; border-radius: 999px; font-size: 14px; font-weight: 700; border: 1px solid var(--line); background: var(--surface); }
+.rchip.good { color: var(--good-hi); }
+.rchip.evil { color: var(--evil-hi); }
+.rrole { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.rrole h3 { font-size: 17px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.rrole h3 i { font-style: normal; font-weight: 500; font-size: 14px; color: var(--muted); }
+.rrole h3 small { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; }
+.rrole h3 small.good { color: var(--good-hi); }
+.rrole h3 small.evil { color: var(--evil-hi); }
+.rrole .tips { margin-top: 6px; font-size: 14px; }
+.nightline { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.nightline b { color: var(--brass); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Avalon</h1>
+    <span class="eyebrow" id="eyebrow">9 players · 6 good · 3 evil</span>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Sections" id="tabs">
+    <button class="tab" role="tab" data-tab="setup" aria-selected="true">Setup</button>
+    <button class="tab" role="tab" data-tab="reveal" aria-selected="false">Reveal</button>
+    <button class="tab" role="tab" data-tab="board" aria-selected="false">Quests</button>
+    <button class="tab" role="tab" data-tab="rules" aria-selected="false">Rules</button>
+  </nav>
+  <main id="view"></main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var KEY = "avalon-table-v2";
+  var TEAMS = { 5: [3,2], 6: [4,2], 7: [4,3], 8: [5,3], 9: [6,3], 10: [6,4] };
+  var SIZES = { 5: [2,3,2,3,3], 6: [2,3,4,3,4], 7: [2,3,3,4,4], 8: [3,4,4,5,5], 9: [3,4,4,5,5], 10: [3,4,4,5,5] };
+  var GOOD_SPECIAL = ["merlin", "percival"];
+  var EVIL_SPECIAL = ["assassin", "morgana", "mordred", "oberon"];
+  var NEEDS_MERLIN = ["percival", "assassin", "mordred"];
+  var ORDER = ["merlin", "percival", "servant", "assassin", "morgana", "mordred", "oberon", "minion"];
+
+  var R = {
+    merlin:   { name: "Gandalf", tag: "Merlin", side: "good", short: "Sees the evil players, except the Nazgûl." },
+    percival: { name: "Frodo", tag: "Percival", side: "good", short: "Sees Gandalf and Saruman, not which is which." },
+    servant:  { name: "Hobbit", many: "Hobbits", tag: "generic good guy", tags: "generic good guys", side: "good", short: "No special knowledge." },
+    assassin: { name: "Assassin", side: "evil", short: "Names Gandalf at the end if good wins." },
+    morgana:  { name: "Saruman", tag: "Morgana", side: "evil", short: "Looks like Gandalf to Frodo." },
+    mordred:  { name: "Nazgûl", tag: "Mordred", side: "evil", short: "Hidden from Gandalf." },
+    oberon:   { name: "Gollum", tag: "Oberon", side: "evil", short: "Unknown to evil, and knows no one." },
+    minion:   { name: "Orc", many: "Orcs", tag: "generic bad guy", tags: "generic bad guys", side: "evil", short: "Knows the other evil players." }
+  };
+
+  function svg(d) { return '<svg class="i" viewBox="0 0 48 48" aria-hidden="true">' + d + "</svg>"; }
+  var SIG = {
+    merlin: svg('<path d="M24 4l11 22H13z"/><path d="M9 26h30"/><path d="M17 26c0 9 3 14 7 18 4-4 7-9 7-18"/>'),
+    percival: svg('<circle cx="24" cy="24" r="12"/><circle cx="24" cy="24" r="7"/><path class="f" d="M24 9.5l1.6 2.6h-3.2z"/>'),
+    servant: svg('<path d="M6 34c0-8 8-14 18-14s18 6 18 14"/><path d="M14 34v8h20v-8"/><path d="M21 42v-5a3 3 0 0 1 6 0v5"/><path d="M4 34h40"/>'),
+    assassin: svg('<path d="M24 5c5 7 5 15 0 23c-5-8-5-16 0-23z"/><path d="M16 30h16M24 30v8"/><circle cx="24" cy="41" r="2.5"/>'),
+    morgana: svg('<path d="M24 5c-9 0-14 8-14 18v20l5-4 4 4 5-4 5 4 4-4 5 4V23c0-10-5-18-14-18z"/><path d="M18 22l4 2M30 22l-4 2"/>'),
+    mordred: svg('<path d="M8 34l3-19 8 9 5-13 5 13 8-9 3 19z"/><path d="M8 40h32"/>'),
+    oberon: svg('<circle cx="16" cy="22" r="6"/><circle cx="32" cy="22" r="6"/><circle class="f" cx="16" cy="22" r="2.5"/><circle class="f" cx="32" cy="22" r="2.5"/><path d="M18 36c4-3 8-3 12 0"/>'),
+    minion: svg('<path d="M10 18l4-10 6 7h8l6-7 4 10"/><path d="M10 18c0 12 6 22 14 22s14-10 14-22"/><path d="M17 26l5 2M31 26l-5 2M19 34h10"/>'),
+    lady: svg('<path d="M24 4v20M19 20h10"/><path d="M5 31c3 0 4.5-2.5 7.5-2.5S16 31 19 31s4.5-2.5 7.5-2.5S30 31 33 31s4.5-2.5 7.5-2.5"/><path d="M8 39c3 0 4.5-2.5 7.5-2.5S19 39 22 39s4.5-2.5 7.5-2.5S33 39 36 39s3-1.5 4.5-2"/>')
+  };
+  var CHECK = '<svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CROSS = '<svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+
+  function recommend(n) { return { merlin: true, percival: true, assassin: true, morgana: true, mordred: n >= 7, oberon: n >= 10 }; }
+  function defaults() {
+    return { tab: "setup", players: 9, names: ["","","","","","","","","",""], roles: recommend(9), custom: false, opts: { lady: false }, game: null };
+  }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY));
+      if (s && TEAMS[s.players] && Array.isArray(s.names) && s.roles && s.opts) {
+        var d = defaults();
+        for (var k in d) if (s[k] === undefined) s[k] = d[k];
+        return s;
+      }
+    } catch (e) {}
+    return null;
+  }
+  var S = load() || defaults();
+  var ui = { open: false, seen: false, anim: false, recheck: null, confirmDeal: false, lady: { target: null, num: null, stage: "choose" }, pick: null, showAll: false };
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  var view = document.getElementById("view");
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function nameOf(i) { var t = (S.names[i] || "").trim(); return esc(t || ("Player " + (i + 1))); }
+  function rand(n) { var a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+  function shuffle(arr) { for (var i = arr.length - 1; i > 0; i--) { var j = rand(i + 1), t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
+  function count(n, role) {
+    var r = R[role];
+    return n + " " + (n === 1 ? r.name : (r.many || r.name)) + (r.tag && r.tags ? " (" + (n === 1 ? r.tag : r.tags) + ")" : "");
+  }
+  function roleSet(list) { var o = {}; list.forEach(function (r) { o[r] = true; }); return o; }
+  function hasOf(g) { return roleSet(g.chars); }
+
+  /* ---------- setup logic ---------- */
+  function active(k) {
+    if (!S.roles[k]) return false;
+    if (NEEDS_MERLIN.indexOf(k) >= 0 && !S.roles.merlin) return false;
+    return true;
+  }
+  function isRec() { var r = recommend(S.players); return ["merlin","percival","assassin","morgana","mordred","oberon"].every(function (k) { return !!S.roles[k] === r[k]; }); }
+  function check() {
+    var n = S.players, ec = TEAMS[n][1], err = [], warn = [];
+    var ev = EVIL_SPECIAL.filter(active).length;
+    if (ev > ec) err.push(n + " players have " + ec + " evil seats, but " + ev + " evil characters are on. Turn off " + (ev - ec) + ".");
+    if (active("percival") && !active("morgana")) warn.push("Frodo will know Gandalf for certain. Add Saruman to keep Gandalf hidden.");
+    if (active("morgana") && !active("percival")) warn.push("Saruman only matters when Frodo is in the game.");
+    if (active("merlin") && !active("assassin")) warn.push("No Assassin: good wins as soon as 3 quests succeed.");
+    if (!active("merlin")) warn.push("Without Gandalf, good plays with no information.");
+    if (S.opts.lady && n < 7) warn.push("Lady of the Lake is usually played with 7 or more players.");
+    return { err: err, warn: warn };
+  }
+  function setupRoles() {
+    var n = S.players, gc = TEAMS[n][0], ec = TEAMS[n][1];
+    var good = GOOD_SPECIAL.filter(active), evil = EVIL_SPECIAL.filter(active).slice(0, ec);
+    while (good.length < gc) good.push("servant");
+    while (evil.length < ec) evil.push("minion");
+    return good.concat(evil);
+  }
+  function config() {
+    if (S.game) return { n: S.game.n, roles: S.game.chars, opts: S.game.opts, dealt: true };
+    return { n: S.players, roles: setupRoles(), opts: S.opts, dealt: false };
+  }
+
+  function deal() {
+    var n = S.players, lead = rand(n), ladyStart = (lead - 1 + n) % n;
+    S.game = {
+      n: n, chars: shuffle(setupRoles()), opts: { lady: !!S.opts.lady },
+      idx: 0, leader: lead, firstLeader: lead, sel: 0,
+      q: [null, null, null, null, null], rejects: 0,
+      lady: S.opts.lady ? { holder: ladyStart, past: [ladyStart], used: [false, false, false, false, false] } : null,
+      assassin: { pick: null, done: false, hit: false }
+    };
+    ui.open = false; ui.seen = false; ui.recheck = null; ui.confirmDeal = false; ui.pick = null; ui.showAll = false;
+    ui.lady = { target: null, num: null, stage: "choose" };
+    S.tab = "reveal";
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- character text ---------- */
+  function tips(role, has) {
+    var t = [], evilSees = has.oberon ? "You’ll know the other evil players, except Gollum." : "You’ll know the other evil players.";
+    switch (role) {
+      case "merlin":
+        t.push(has.mordred ? "You’ll know every evil player except the Nazgûl." : "You’ll know every evil player.");
+        t.push("Steer teams and votes away from evil, but keep your hints subtle.");
+        t.push(has.assassin ? "If good wins 3 quests, the Assassin gets one guess at who Gandalf is. A correct guess wins it for evil." : "There is no Assassin this game, so you can push harder.");
+        break;
+      case "percival":
+        if (has.morgana) { t.push("You’ll see Gandalf and Saruman, but not which is which."); t.push("Watch how they play to find the real Gandalf, then back their picks."); }
+        else { t.push("You’ll know who Gandalf is."); t.push("Back Gandalf’s picks without making it obvious."); }
+        if (has.assassin) t.push("Act like you might be Gandalf so the Assassin aims at you instead.");
+        break;
+      case "servant":
+        t.push("You start with no information. Read the votes, team picks and quest results.");
+        t.push("Push for teams you trust and question the ones you don’t.");
+        break;
+      case "assassin":
+        t.push(evilSees);
+        t.push("If good wins 3 quests, talk it over with evil, then name one player as Gandalf. Get it right and evil wins.");
+        t.push("All game, watch for whoever seems to know too much.");
+        break;
+      case "morgana":
+        t.push(evilSees);
+        t.push(has.percival ? "Frodo sees you and Gandalf as a pair. Act like Gandalf to win Frodo’s trust." : "Frodo is not in this game, so play as a regular evil player.");
+        break;
+      case "mordred":
+        t.push(evilSees);
+        t.push(has.merlin ? "Gandalf can’t see you. Use that to earn trust and get onto teams." : "Earn trust and get onto teams.");
+        break;
+      case "oberon":
+        t.push("You don’t know the other evil players, and they don’t know you.");
+        if (has.merlin) t.push("Gandalf can see you.");
+        t.push("Be careful failing quests: another evil player may fail the same one.");
+        break;
+      case "minion":
+        t.push(evilSees);
+        t.push("Get onto teams and fail quests when it helps evil.");
+        break;
+    }
+    t.push(R[role].side === "evil" ? "On a quest, you can play Success or Fail." : "On a quest, you must play Success.");
+    return t;
+  }
+  function evilShownToMerlin(has) { return Object.keys(has).some(function (r) { return R[r].side === "evil" && r !== "mordred"; }); }
+  function evilSeesEachOther(has) { return Object.keys(has).some(function (r) { return R[r].side === "evil" && r !== "oberon"; }); }
+  function nightActs(role, has) {
+    var a = [], side = R[role].side;
+    if (side === "evil" && role !== "oberon") a.push("Open your eyes when evil is called, and see who else is evil.");
+    if (role === "oberon" && evilSeesEachOther(has)) a.push("Keep your eyes closed when evil is called.");
+    if (side === "evil" && has.merlin) a.push(role === "mordred" ? "Keep your thumb down when evil is shown to Gandalf." : "Put your thumb up when evil is shown to Gandalf.");
+    if (role === "merlin" && evilShownToMerlin(has)) a.push("Open your eyes when Gandalf is called. Every thumb up is evil." + (has.mordred ? " The Nazgûl stays hidden." : ""));
+    if (role === "percival") a.push(has.morgana ? "Open your eyes when Frodo is called. One thumb up is Gandalf, the other is Saruman." : "Open your eyes when Frodo is called. The thumb up is Gandalf.");
+    if (has.percival && (role === "merlin" || role === "morgana")) a.push("Put your thumb up when you’re shown to Frodo.");
+    if (!a.length) a.push("Keep your eyes closed all night.");
+    return a;
+  }
+  function nightScript(has) {
+    var L = [];
+    L.push({ t: "Everyone close your eyes and put a fist out in front of you." });
+    if (evilSeesEachOther(has)) {
+      L.push({ t: has.oberon ? "Evil, except Gollum, open your eyes and look around at each other." : "Evil, open your eyes and look around at each other.", p: true });
+      L.push({ t: "Evil, close your eyes." });
+    }
+    if (has.merlin && evilShownToMerlin(has)) {
+      L.push({ t: has.mordred ? "Evil, except the Nazgûl, put your thumb up." : "Evil, put your thumb up." });
+      L.push({ t: "Gandalf, open your eyes and see the agents of evil.", p: true });
+      L.push({ t: "Gandalf, close your eyes. Evil, thumbs down." });
+    }
+    if (has.percival) {
+      if (has.morgana) { L.push({ t: "Gandalf and Saruman, put your thumb up." }); L.push({ t: "Frodo, open your eyes. One of them is Gandalf, one is Saruman.", p: true }); }
+      else { L.push({ t: "Gandalf, put your thumb up." }); L.push({ t: "Frodo, open your eyes and see Gandalf.", p: true }); }
+      L.push({ t: "Frodo, close your eyes. Thumbs down." });
+    }
+    L.push({ t: "Everyone keep your fists out, and open your eyes." });
+    return L;
+  }
+  function scriptHTML(has) {
+    return "<ol>" + nightScript(has).map(function (l) { return "<li>“" + l.t + "”" + (l.p ? " <em>Pause 5 sec.</em>" : "") + "</li>"; }).join("") + "</ol>";
+  }
+  function roleLabel(role) { var r = R[role]; return r.name + (r.tag ? " (" + r.tag + ")" : ""); }
+
+  /* ---------- quest logic ---------- */
+  function qsize(g, i) { return SIZES[g.n][i]; }
+  function need(g, i) { return (g.n >= 7 && i === 3) ? 2 : 1; }
+  function result(g, i) { return g.q[i] == null ? null : (g.q[i] >= need(g, i) ? "fail" : "success"); }
+  function nextOpen(g) { for (var i = 0; i < 5; i++) if (g.q[i] == null) return i; return -1; }
+  function status(g) {
+    var good = 0, evil = 0, has = hasOf(g);
+    for (var i = 0; i < 5; i++) { var r = result(g, i); if (r === "success") good++; if (r === "fail") evil++; }
+    var st = { good: good, evil: evil, over: false, assassination: false };
+    var assn = has.assassin && has.merlin;
+    if (evil >= 3) { st.over = true; st.winner = "evil"; st.why = "Three quests failed."; }
+    else if (g.rejects >= 5) { st.over = true; st.winner = "evil"; st.why = "Five teams were rejected in a row."; }
+    else if (good >= 3) {
+      if (assn && !g.assassin.done) st.assassination = true;
+      else if (assn) {
+        var nm = nameOf(g.assassin.pick);
+        st.over = true; st.winner = g.assassin.hit ? "evil" : "good";
+        st.why = g.assassin.hit ? "The Assassin found Gandalf: " + nm + "." : nm + " was not Gandalf. Good holds on.";
+      } else { st.over = true; st.winner = "good"; st.why = "Three quests succeeded."; }
+    }
+    return st;
+  }
+  function ladyPending(g) {
+    if (!g.lady) return -1;
+    for (var qi = 1; qi <= 3; qi++) if (g.q[qi] != null && !g.lady.used[qi]) return qi;
+    return -1;
+  }
+
+  /* ---------- views ---------- */
+  function empty(title, text) {
+    return '<section class="empty"><h2>' + title + '</h2><p class="muted">' + text + '</p><button class="cta" data-act="tab" data-tab="setup">Go to Setup</button></section>';
+  }
+
+  function viewSetup() {
+    var n = S.players, gc = TEAMS[n][0], ec = TEAMS[n][1];
+    var goodOn = GOOD_SPECIAL.filter(active).length, evilOn = EVIL_SPECIAL.filter(active).length;
+    var hobbits = gc - goodOn, orcs = Math.max(0, ec - evilOn);
+    var h = "";
+    if (S.game) h += '<p class="note"><span>A game is in progress.</span><button class="link" data-act="tab" data-tab="reveal">Back to it</button></p>';
+    h += '<section class="block"><div class="sec-head"><h2>Players</h2><span>' + gc + " good · " + ec + ' evil</span></div>';
+    h += '<div class="count" role="radiogroup" aria-label="Number of players">';
+    [5,6,7,8,9,10].forEach(function (k) { h += '<button class="cnt" role="radio" aria-checked="' + (k === n) + '" data-act="count" data-n="' + k + '">' + k + "</button>"; });
+    h += '</div><div class="qline"><span>Quest teams</span>';
+    SIZES[n].forEach(function (s, i) { h += '<span class="qmini' + (n >= 7 && i === 3 ? " two" : "") + '">' + s + "</span>"; });
+    if (n >= 7) h += "<span>Red ring: needs 2 fails</span>";
+    h += "</div></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Characters</h2>' + (isRec() ? "<span>Recommended for " + n + "</span>" : '<button class="link" data-act="recommend">Use recommended for ' + n + "</button>") + "</div>";
+    h += '<h3 class="side good">Good</h3><div class="roles">' + GOOD_SPECIAL.map(roleToggle).join("") + '<div class="filler">+ ' + count(hobbits, "servant") + "</div></div>";
+    h += '<h3 class="side evil">Evil</h3><div class="roles">' + EVIL_SPECIAL.map(roleToggle).join("") + (orcs > 0 ? '<div class="filler">+ ' + count(orcs, "minion") + "</div>" : "") + "</div></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Extra rules</h2></div><div class="roles">';
+    h += '<button class="toggle" role="switch" aria-checked="' + !!S.opts.lady + '" data-act="opt" data-k="lady"><span class="sig rule">' + SIG.lady + '</span><span class="tt"><b>Lady of the Lake</b><small>After quests 2, 3 and 4, the holder secretly checks one player’s loyalty. Players need to remember their character number.</small></span><span class="sw" aria-hidden="true"></span></button>';
+    h += "</div></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Names</h2><span>Optional. Seating order, clockwise</span></div><p class="muted small">Used to show who leads each turn on the Quests tab.</p><div class="names">';
+    for (var i = 0; i < n; i++) h += '<label class="seat" for="name-' + i + '"><span>' + (i + 1) + '</span><input id="name-' + i + '" data-name="' + i + '" maxlength="16" autocomplete="off" autocapitalize="words" enterkeyhint="next" placeholder="Player ' + (i + 1) + '" value="' + esc(S.names[i] || "") + '"></label>';
+    h += "</div></section>";
+
+    h += '<div class="foot" id="setupFoot">' + footHTML() + "</div>";
+    return h;
+  }
+  function footHTML() {
+    var v = check(), h = '<div class="msgs">';
+    v.err.forEach(function (m) { h += '<p class="msg err">' + m + "</p>"; });
+    v.warn.forEach(function (m) { h += '<p class="msg warn">' + m + "</p>"; });
+    h += "</div>";
+    if (S.game && ui.confirmDeal) h += '<div class="confirm"><span>Deal new characters? This ends the current game.</span><div><button class="btn" data-act="cancelDeal">Cancel</button><button class="btn danger" data-act="deal">Deal</button></div></div>';
+    else h += '<button class="cta" data-act="' + (S.game ? "askDeal" : "deal") + '"' + (v.err.length ? " disabled" : "") + ">" + (S.game ? "Deal a new game" : "Deal characters") + "</button>";
+    return h;
+  }
+  function roleToggle(k) {
+    var blocked = NEEDS_MERLIN.indexOf(k) >= 0 && !S.roles.merlin, r = R[k];
+    return '<button class="toggle" role="switch" aria-checked="' + active(k) + '" data-act="role" data-k="' + k + '"' + (blocked ? " disabled" : "") + '><span class="sig ' + r.side + '">' + SIG[k] + '</span><span class="tt"><b>' + r.name + (r.tag ? " <i>" + r.tag + "</i>" : "") + "</b><small>" + (blocked ? "Needs Gandalf" : r.short) + '</small></span><span class="sw" aria-hidden="true"></span></button>';
+  }
+
+  function viewReveal() {
+    var g = S.game;
+    if (!g) return empty("No characters dealt yet", "Pick the players and characters in Setup, then deal.");
+    if (ui.recheck == null && g.idx >= g.n) return viewDone(g);
+    return viewChar(g, ui.recheck != null ? ui.recheck : g.idx);
+  }
+  function viewChar(g, i) {
+    var role = g.chars[i], r = R[role], has = hasOf(g), re = ui.recheck != null, anim = ui.anim ? " anim" : "";
+    var h = '<section class="reveal"><span class="eyebrow">' + (re ? "Re-reveal · " : "") + "Character " + (i + 1) + " of " + g.n + "</span>";
+    h += '<button class="flip" data-act="flip" aria-pressed="' + ui.open + '" aria-label="' + (ui.open ? "Hide character " : "Reveal character ") + (i + 1) + '">';
+    if (ui.open) {
+      h += '<div class="rolecard ' + r.side + anim + '"><div class="rc-in"><span class="rc-side">Character ' + (i + 1) + '</span><span class="rc-sig">' + SIG[role] + "</span>";
+      h += '<div><h2 class="rc-name">' + r.name + "</h2>" + (r.tag ? '<span class="rc-tag">(' + r.tag + ")</span>" : "") + "</div>";
+      h += '<span class="rc-team">' + (r.side === "good" ? "Good" : "Evil") + "</span></div></div>";
+    } else {
+      h += '<div class="cardback' + anim + '"><div class="cb-in"><span class="cb-label">Character</span><span class="cb-num">' + (i + 1) + "</span></div></div>";
+    }
+    h += "</button>";
+    if (ui.open) {
+      h += '<p class="hint">Tap the card again to hide it.</p>';
+      h += '<div class="knows"><h3>Your night</h3><ol>' + nightActs(role, has).map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ol></div>";
+      h += '<ul class="tips">' + tips(role, has).map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
+    } else {
+      h += '<p class="hint">' + (ui.seen ? "Tap the card to see it again." : "Tap the card to reveal your character.") + "</p>";
+      if (re) h += '<button class="cta" data-act="endRecheck">Done</button>';
+      else {
+        h += '<button class="cta" data-act="next"' + (ui.seen ? "" : " disabled") + ">" + (i + 1 < g.n ? "Next character" : "Finish") + "</button>";
+        h += '<p class="muted small">' + (ui.seen ? (i + 1 < g.n ? "Then pass the phone to the next player." : "Then hand the phone to the narrator.") : "Reveal it first, then this unlocks.") + "</p>";
+        h += '<div class="dots" aria-hidden="true">';
+        for (var k = 0; k < g.n; k++) h += '<span class="' + (k < g.idx ? "seen" : k === i ? "cur" : "") + '"></span>';
+        h += "</div>";
+      }
+    }
+    return h + "</section>";
+  }
+  function viewDone(g) {
+    var has = hasOf(g);
+    var h = '<section class="done"><h2>All ' + g.n + " characters are out</h2>";
+    h += '<div class="facts"><div class="fact"><span>First leader</span><b>' + nameOf(g.firstLeader) + "</b></div>";
+    if (g.lady) h += '<div class="fact"><span>Lady of the Lake</span><b>' + nameOf(g.lady.past[0]) + "</b></div>";
+    h += "</div>";
+    h += '<div class="script"><h3>Narrator: read the night script</h3>' + scriptHTML(has) + "</div>";
+    h += '<button class="cta" data-act="tab" data-tab="board">Start the quests</button>';
+    h += '<section class="block"><div class="sec-head"><h2>Re-reveal a character</h2><span>Tap the number you had</span></div><div class="numgrid">';
+    for (var i = 0; i < g.n; i++) h += '<button class="num" data-act="recheck" data-i="' + i + '" aria-label="Re-reveal character ' + (i + 1) + '">' + (i + 1) + "</button>";
+    return h + "</div></section></section>";
+  }
+
+  function viewBoard() {
+    var g = S.game;
+    if (!g) return empty("No game yet", "Deal characters in Setup and the quest board will be ready here.");
+    var st = status(g), h = "";
+    h += '<div class="score" aria-live="polite"><div class="g"><span>Good</span><b>' + st.good + '</b></div><div class="e"><span>Evil</span><b>' + st.evil + "</b></div></div>";
+    if (st.over) h += overPanel(g, st);
+    else if (st.assassination) h += assassinPanel(g);
+    else {
+      var open = nextOpen(g);
+      h += '<div class="leader"><button class="arrow" data-act="lead" data-d="-1" aria-label="Previous leader">‹</button><div class="ld"><span>Leader</span><b>' + nameOf(g.leader) + "</b>";
+      h += "<small>" + (open >= 0 ? "Picks " + qsize(g, open) + " players for Quest " + (open + 1) : "") + (g.lady ? (open >= 0 ? " · " : "") + "Lady: <strong>" + nameOf(g.lady.holder) + "</strong>" : "") + "</small></div>";
+      h += '<button class="arrow" data-act="lead" data-d="1" aria-label="Next leader">›</button></div>';
+      var lp = ladyPending(g);
+      if (lp >= 0) h += ladyPanel(g, lp);
+    }
+    h += '<section class="quests" aria-label="Quests">';
+    for (var j = 0; j < 5; j++) {
+      var res = result(g, j), f = g.q[j];
+      var inner = res === "success" ? CHECK : res === "fail" ? CROSS : '<span class="n">' + qsize(g, j) + "</span>";
+      var label = "Quest " + (j + 1) + ", " + qsize(g, j) + " players, " + (res ? (res === "success" ? "succeeded" : "failed") : "not played") + (f > 0 ? ", " + f + " fail card" + (f > 1 ? "s" : "") : "");
+      h += '<button class="q' + (res ? " " + res : "") + (g.sel === j ? " sel" : "") + '" data-act="q" data-i="' + j + '" aria-label="' + label + '" aria-pressed="' + (g.sel === j) + '"><span class="disc">' + inner + (f > 0 ? '<span class="badge" aria-hidden="true">' + f + "</span>" : "") + '</span><span class="cap"><span class="t">Quest ' + (j + 1) + '</span><span class="r">' + (need(g, j) === 2 ? "2 fails" : "") + "</span></span></button>";
+    }
+    h += "</section>";
+
+    var s = g.sel, sr = result(g, s);
+    h += '<section class="panel" aria-label="Quest result"><div class="panel-head"><h2>Quest ' + (s + 1) + " · " + qsize(g, s) + " players</h2><p>" + (need(g, s) === 2 ? "Needs two fail cards to fail." : "One fail card fails this quest.") + " Green card = Success, red card = Fail.</p></div>";
+    h += '<div class="choices"><button class="choice good" data-act="success" aria-pressed="' + (sr === "success") + '">' + CHECK.replace('class="mark" ', "") + 'Success</button><button class="choice evil" data-act="fail" aria-pressed="' + (sr === "fail") + '">' + CROSS.replace('class="mark" ', "") + "Fail</button></div>";
+    if (sr != null) {
+      var max = Math.min(qsize(g, s), TEAMS[g.n][1]);
+      h += '<div class="fails"><span>Fail cards played</span><div class="chips">';
+      for (var c = 0; c <= max; c++) h += '<button class="chip" data-act="chip" data-f="' + c + '" aria-pressed="' + (g.q[s] === c) + '" aria-label="' + c + ' fail cards">' + c + "</button>";
+      h += "</div></div>";
+      var nx = nextOpen(g);
+      h += '<div class="row-actions"><button class="link" data-act="clear">Clear result</button>' + (nx >= 0 && nx !== s ? '<button class="pill" data-act="goto" data-i="' + nx + '">Go to Quest ' + (nx + 1) + "</button>" : "") + "</div>";
+    }
+    h += "</section>";
+
+    h += '<section class="block" aria-label="Vote track"><div class="sec-head"><h2>Vote Track</h2><span>5 rejected teams in a row: evil wins</span></div><div class="pips">';
+    for (var k = 1; k <= 5; k++) h += '<button class="pip' + (k === 5 ? " last" : "") + (g.rejects >= k ? " on" : "") + '" data-act="pip" data-k="' + k + '" aria-label="' + k + ' rejected">' + k + "</button>";
+    h += '</div><div class="duo"><button class="btn primary" data-act="reject">Team rejected</button><button class="btn" data-act="resetVotes">Reset track</button></div></section>';
+    return h;
+  }
+  function ladyPanel(g, qi) {
+    var L = g.lady, holder = nameOf(L.holder), st = ui.lady.stage, t = ui.lady.target;
+    var h = '<section class="panel lady"><div class="panel-head"><h2>Lady of the Lake</h2>';
+    if (st === "choose") {
+      h += "<p>After Quest " + (qi + 1) + ". " + holder + " picks one player to examine.</p></div><div class=\"namebtns\">";
+      for (var i = 0; i < g.n; i++) {
+        var off = L.past.indexOf(i) >= 0;
+        h += '<button class="nbtn" data-act="ladyT" data-i="' + i + '" aria-pressed="' + (t === i) + '"' + (off ? " disabled" : "") + ">" + nameOf(i) + "</button>";
+      }
+      h += '</div><button class="cta" data-act="ladyNumStage"' + (t == null ? " disabled" : "") + ">" + (t == null ? "Pick a player" : "Hand the phone to " + nameOf(t)) + "</button>";
+      h += '<div class="row-actions"><button class="link" data-act="ladySkip">Skip this check</button></div>';
+    } else if (st === "num") {
+      h += "<p>" + nameOf(t) + ", tap your own character number. " + holder + ", look away.</p></div><div class=\"numgrid\">";
+      for (var k = 0; k < g.n; k++) h += '<button class="num" data-act="ladyNum" data-i="' + k + '">' + (k + 1) + "</button>";
+      h += '</div><div class="row-actions"><button class="link" data-act="ladyBack">Back</button></div>';
+    } else if (st === "pass") {
+      h += "<p>Hand the phone to " + holder + ". Only " + holder + " should look.</p></div>";
+      h += '<button class="cta" data-act="ladyShow">I’m ' + holder + ". Show loyalty</button>";
+      h += '<div class="row-actions"><button class="link" data-act="ladyBack">Back</button></div>';
+    } else {
+      var side = R[g.chars[ui.lady.num]].side;
+      h += "<p>Only " + holder + " sees this. Say whatever you like about it.</p></div>";
+      h += '<div class="loyal ' + side + '"><span>' + nameOf(t) + " is</span><b>" + (side === "good" ? "Good" : "Evil") + "</b></div>";
+      h += '<button class="cta" data-act="ladyDone" data-q="' + qi + '">Hide and give the Lady to ' + nameOf(t) + "</button>";
+    }
+    return h + "</section>";
+  }
+  function assassinPanel(g) {
+    var p = ui.pick, h = '<section class="panel assn"><div class="panel-head"><h2>Assassination</h2><p>Good has won 3 quests. Evil, talk it over. Assassin, name the player you think is Gandalf. That player then says whether they are.</p></div><div class="namebtns">';
+    for (var i = 0; i < g.n; i++) h += '<button class="nbtn" data-act="apick" data-i="' + i + '" aria-pressed="' + (p === i) + '">' + nameOf(i) + "</button>";
+    h += '</div><div class="duo"><button class="btn danger" data-act="assassinate" data-hit="1"' + (p == null ? " disabled" : "") + '>They were Gandalf</button><button class="btn good" data-act="assassinate" data-hit="0"' + (p == null ? " disabled" : "") + ">They weren’t</button></div>";
+    if (p == null) h += '<p class="muted small">Pick the named player first.</p>';
+    return h + "</section>";
+  }
+  function overPanel(g, st) {
+    var h = '<section class="over ' + st.winner + '"><h2>' + (st.winner === "good" ? "Good wins" : "Evil wins") + "</h2><p>" + st.why + "</p>";
+    h += '<button class="btn" data-act="showAll">' + (ui.showAll ? "Hide characters" : "Reveal every character") + "</button>";
+    if (ui.showAll) {
+      h += '<div class="alllist">';
+      g.chars.forEach(function (role, i) { h += '<div class="arow"><b>Character ' + (i + 1) + '</b><span class="' + R[role].side + '">' + roleLabel(role) + "</span></div>"; });
+      h += "</div>";
+    }
+    h += '<button class="cta" data-act="redeal">Deal again with the same setup</button>';
+    if (g.assassin.done) h += '<div class="row-actions"><button class="link" data-act="undoAssassin">Undo the assassination</button></div>';
+    return h + "</section>";
+  }
+
+  function viewRules() {
+    var c = config(), has = roleSet(c.roles), gc = TEAMS[c.n][0], ec = TEAMS[c.n][1], cnt = {};
+    c.roles.forEach(function (r) { cnt[r] = (cnt[r] || 0) + 1; });
+    var present = ORDER.filter(function (r) { return cnt[r]; });
+    var h = '<p class="note"><span>' + (c.dealt ? "Rules for the game in progress." : "Rules for the setup you’ve picked. They change as you edit Setup.") + "</span></p>";
+
+    h += '<section class="block"><div class="sec-head"><h2>This game</h2><span>' + c.n + " players · " + gc + " good · " + ec + ' evil</span></div><div class="chipline">';
+    present.forEach(function (r) { h += '<span class="rchip ' + R[r].side + '">' + (cnt[r] > 1 ? cnt[r] + " × " : "") + (cnt[r] > 1 && R[r].many ? R[r].many : R[r].name) + "</span>"; });
+    h += '</div><div class="qline"><span>Quest teams</span>';
+    SIZES[c.n].forEach(function (s, i) { h += '<span class="qmini' + (c.n >= 7 && i === 3 ? " two" : "") + '">' + s + "</span>"; });
+    if (c.n >= 7) h += "<span>Quest 4 needs 2 fails</span>";
+    h += "</div></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Dealing</h2></div><ol class="steps">';
+    h += "<li>The phone shows Character 1. The first player taps the card to see their character, then taps again to hide it.</li>";
+    h += "<li>They tap Next character and pass the phone on. The number means nothing, it just keeps the order.</li>";
+    h += "<li>When everyone has seen theirs, the narrator reads the night script.</li></ol></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>How a round goes</h2></div><ol class="steps">';
+    h += "<li>The leader picks a team. The size for each quest is on the Quests tab.</li>";
+    h += "<li>Everyone discusses the team.</li>";
+    h += "<li>Everyone votes at the same time, thumbs up or down. More than half up and the team goes. A tie or fewer and the team is rejected.</li>";
+    h += "<li>A rejected team passes leadership clockwise, and the new leader proposes a team. Five rejected teams in a row and evil wins.</li>";
+    h += "<li>Each team member plays a quest card face down: green for Success, red for Fail. Good players must play Success. The leader shuffles the cards and flips them.</li>";
+    h += "<li>One Fail card fails the quest." + (c.n >= 7 ? " Quest 4 needs two." : "") + "</li>";
+    h += "<li>Leadership passes clockwise and the next quest begins.</li></ol></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Winning</h2></div><div class="prose"><p>The first side to win 3 quests wins.</p>';
+    if (has.assassin && has.merlin) h += "<p>If good gets there first, evil gets one last chance. Evil talks it over, then the Assassin names one player as Gandalf. A correct guess wins it for evil.</p>";
+    h += "</div></section>";
+
+    if (c.opts.lady) {
+      h += '<section class="block"><div class="sec-head"><h2>Lady of the Lake</h2></div><div class="prose">';
+      h += "<p>The Lady starts with the player to the right of the first leader. After Quests 2, 3 and 4, the holder picks a player. That player taps their own character number on the phone, and the holder privately sees Good or Evil. Then the holder hands the Lady to that player.</p>";
+      h += "<p>Anyone who has held the Lady can’t be examined. The holder can tell the table anything, true or not.</p></div></section>";
+    }
+
+    h += '<section class="block"><div class="sec-head"><h2>Characters in this game</h2></div><div class="roles">';
+    present.forEach(function (r) {
+      var R0 = R[r];
+      h += '<div class="rrole"><span class="sig ' + R0.side + '">' + SIG[r] + '</span><div><h3>' + R0.name + (R0.tag ? " <i>(" + R0.tag + ")</i>" : "") + (cnt[r] > 1 ? " × " + cnt[r] : "") + ' <small class="' + R0.side + '">' + (R0.side === "good" ? "Good" : "Evil") + "</small></h3>";
+      h += '<ul class="tips">' + tips(r, has).map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
+      h += '<p class="nightline"><b>At night:</b> ' + nightActs(r, has).join(" ") + "</p></div></div>";
+    });
+    h += "</div></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Night script</h2><span>Read after everyone has seen their character</span></div>';
+    h += '<div class="script">' + scriptHTML(has) + "</div></section>";
+
+    h += '<section class="block"><div class="sec-head"><h2>Fair play</h2></div><div class="prose"><p>Spend about the same few seconds on your card as everyone else, so nobody can read your character from how long you look.</p></div></section>';
+    return h;
+  }
+
+  /* ---------- render & events ---------- */
+  function eyebrow() {
+    var n = S.game ? S.game.n : S.players;
+    return n + " players · " + TEAMS[n][0] + " good · " + TEAMS[n][1] + " evil";
+  }
+  function render() {
+    document.querySelectorAll(".tab").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.tab === S.tab)); });
+    document.getElementById("eyebrow").textContent = eyebrow();
+    view.innerHTML = S.tab === "setup" ? viewSetup() : S.tab === "reveal" ? viewReveal() : S.tab === "board" ? viewBoard() : viewRules();
+    ui.anim = false;
+    save();
+    wake(!!S.game && (S.tab === "reveal" || S.tab === "board"));
+  }
+  function setTab(t) {
+    ui.open = false; ui.confirmDeal = false;
+    if (ui.lady.stage === "show") ui.lady.stage = "pass";
+    S.tab = t; render(); window.scrollTo(0, 0);
+  }
+
+  document.getElementById("tabs").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab);
+  });
+
+  view.addEventListener("input", function (e) {
+    var i = e.target.getAttribute("data-name"); if (i == null) return;
+    S.names[+i] = e.target.value;
+    save();
+  });
+  view.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var i = e.target.getAttribute("data-name"); if (i == null) return;
+    e.preventDefault();
+    var nx = document.getElementById("name-" + (+i + 1)); if (nx) nx.focus(); else e.target.blur();
+  });
+
+  view.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
+    var a = el.dataset.act, g = S.game;
+    switch (a) {
+      case "tab": setTab(el.dataset.tab); return;
+      case "count": S.players = +el.dataset.n; if (!S.custom) S.roles = recommend(S.players); break;
+      case "role": S.roles[el.dataset.k] = !S.roles[el.dataset.k]; S.custom = true; break;
+      case "recommend": S.roles = recommend(S.players); S.custom = false; break;
+      case "opt": S.opts[el.dataset.k] = !S.opts[el.dataset.k]; break;
+      case "askDeal": ui.confirmDeal = true; break;
+      case "cancelDeal": ui.confirmDeal = false; break;
+      case "deal": if (check().err.length) break; deal(); break;
+      case "redeal": deal(); break;
+      case "flip": ui.open = !ui.open; if (ui.open) ui.seen = true; ui.anim = true; break;
+      case "next": g.idx++; ui.open = false; ui.seen = false; window.scrollTo(0, 0); break;
+      case "recheck": ui.recheck = +el.dataset.i; ui.open = false; ui.seen = false; window.scrollTo(0, 0); break;
+      case "endRecheck": ui.recheck = null; ui.open = false; break;
+      case "q": case "goto": g.sel = +el.dataset.i; break;
+      case "success": setResult(0); break;
+      case "fail": setResult(result(g, g.sel) === "fail" ? g.q[g.sel] : need(g, g.sel)); break;
+      case "chip": g.q[g.sel] = +el.dataset.f; break;
+      case "clear": g.q[g.sel] = null; break;
+      case "pip": var k = +el.dataset.k; g.rejects = g.rejects === k ? k - 1 : k; break;
+      case "reject": if (g.rejects < 5) { g.rejects++; g.leader = (g.leader + 1) % g.n; } break;
+      case "resetVotes": g.rejects = 0; break;
+      case "lead": g.leader = (g.leader + (+el.dataset.d) + g.n) % g.n; break;
+      case "ladyT": ui.lady.target = +el.dataset.i; break;
+      case "ladyNumStage": ui.lady.stage = "num"; break;
+      case "ladyNum": ui.lady.num = +el.dataset.i; ui.lady.stage = "pass"; break;
+      case "ladyBack": ui.lady.stage = ui.lady.stage === "pass" ? "num" : "choose"; break;
+      case "ladyShow": ui.lady.stage = "show"; break;
+      case "ladySkip": g.lady.used[ladyPending(g)] = true; ui.lady = { target: null, num: null, stage: "choose" }; break;
+      case "ladyDone":
+        var t = ui.lady.target; g.lady.used[+el.dataset.q] = true; g.lady.holder = t; g.lady.past.push(t);
+        ui.lady = { target: null, num: null, stage: "choose" }; break;
+      case "apick": ui.pick = +el.dataset.i; break;
+      case "assassinate": g.assassin = { pick: ui.pick, done: true, hit: el.dataset.hit === "1" }; ui.pick = null; break;
+      case "undoAssassin": g.assassin = { pick: null, done: false, hit: false }; ui.showAll = false; break;
+      case "showAll": ui.showAll = !ui.showAll; break;
+    }
+    render();
+  });
+
+  function setResult(val) {
+    var g = S.game, wasOpen = g.q[g.sel] == null;
+    g.q[g.sel] = val;
+    if (wasOpen) { g.rejects = 0; g.leader = (g.leader + 1) % g.n; }
+  }
+
+  // Hide any secret on screen if the phone locks or the app goes to the background.
+  var lock = null;
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") {
+      var changed = false;
+      if (ui.open) { ui.open = false; changed = true; }
+      if (ui.lady.stage === "show") { ui.lady.stage = "pass"; changed = true; }
+      if (changed) render();
+      lock = null;
+    } else if (S.game) wake(true);
+  });
+  function wake(on) {
+    try {
+      if (on && !lock && navigator.wakeLock && document.visibilityState === "visible") {
+        navigator.wakeLock.request("screen").then(function (l) { lock = l; l.addEventListener("release", function () { lock = null; }); }).catch(function () {});
+      } else if (!on && lock) { lock.release().catch(function () {}); lock = null; }
+    } catch (e) {}
+  }
+
+  if (S.tab !== "setup" && !S.game) S.tab = "setup";
+  render();
+})();
+</script>
+</body>
+</html>
